@@ -3,20 +3,38 @@ name: Build Wheels
 on:
   push:
     branches:
-      - master
+      - main
       - 'dev/**'
     tags:
       - "v*"
   pull_request:
     branches:
-      - master
+      - main
       - 'dev/**'
 
 permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: build-wheels-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  release_contract:
+    name: Validate Python contracts (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_*.py'
+
   build_wheels:
     name: Build wheels (${{ matrix.platform }}-${{ matrix.arch }})
     runs-on: ${{ matrix.runs_on }}
@@ -105,7 +123,7 @@ jobs:
           $headers = @{ Authorization = "token $env:GH_TOKEN" }
           $url = "https://github.com/pypa/get-virtualenv/blob/20.26.6/public/virtualenv.pyz?raw=true"
           Invoke-WebRequest -Uri $url -OutFile $dest -Headers $headers -UseBasicParsing
-          Write-Host "✅ Downloaded virtualenv.pyz"
+          Write-Host "Downloaded virtualenv.pyz"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
@@ -126,7 +144,7 @@ jobs:
     name: Publish to PyPI
     needs: [build_wheels]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.repository == 'Comfy-Org/comfy-aimdo' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
     environment: pypi
     permissions:
       id-token: write  # Required for Trusted Publishing
@@ -150,3 +168,84 @@ jobs:
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/v')
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  dinkster_release:
+    name: Publish Dinkster native wheel release
+    needs: [build_wheels, release_contract]
+    runs-on: ubuntu-latest
+    if: github.repository == 'Kosinkadink/dinkster-aimdo' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download native wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-*-*
+          merge-multiple: true
+
+      - name: Build hash-pinned manifest
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python scripts/build_release_manifest.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --release-tag "$GITHUB_REF_NAME" \
+            --version "$version" \
+            --source-commit "$GITHUB_SHA" \
+            --output "dist/dinkster_aimdo-${version}-manifest.json" \
+            dist/*.whl
+
+      - name: Create or resume draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if gh release view "$GITHUB_REF_NAME" --json isDraft > release-state.json 2>/dev/null; then
+            if [ "$(jq -r .isDraft release-state.json)" != "true" ]; then
+              echo "error: release already exists and is not a draft" >&2
+              exit 1
+            fi
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --draft \
+              --verify-tag \
+              --title "dinkster-aimdo ${version}" \
+              --notes "Dinkster native wheels and their hash-pinned manifest."
+          fi
+
+      - name: Upload and verify exact release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          gh release view "$GITHUB_REF_NAME" --json assets,isDraft > release-assets.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          release = json.loads(Path("release-assets.json").read_text())
+          if release.get("isDraft") is not True:
+              raise SystemExit("release must remain a draft until verification completes")
+          local = {path.name: path.stat().st_size for path in Path("dist").iterdir() if path.is_file()}
+          remote_entries = release.get("assets")
+          if not isinstance(remote_entries, list):
+              raise SystemExit("release asset metadata is invalid")
+          remote = {entry.get("name"): entry.get("size") for entry in remote_entries}
+          if len(remote) != len(remote_entries) or remote != local:
+              raise SystemExit("release assets do not exactly match the verified local matrix")
+          PY
+
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release edit "$GITHUB_REF_NAME" --draft=false

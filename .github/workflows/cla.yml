@@ -7,14 +7,17 @@ on:
     types: [opened, synchronize, closed]
 
 permissions:
-  actions: write
-  contents: read # 'read' is enough because signatures live in a REMOTE repo
-  pull-requests: write
-  statuses: write
+  contents: read
 
 jobs:
   cla-assistant:
+    if: github.repository == 'Comfy-Org/comfy-aimdo'
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: write
+      statuses: write
     steps:
       # The CLA action normally requires every commit author in a PR to sign.
       # We only want the PR author to sign, so we allowlist all other committers
@@ -78,7 +81,7 @@ jobs:
 
           # Custom PR comment messages
           custom-notsigned-prcomment: |
-            🎉 Thank you for your contribution, we really appreciate it! 🎉
+            Thank you for your contribution, we really appreciate it!
 
             Like many open source projects, we require contributors to sign our [Contributor License Agreement (CLA)](https://github.com/Comfy-Org/comfy-cla/blob/main/comfyui_icla.md). A CLA makes the ownership of contributions explicit, so contributors and the project share a clear understanding of how the code can be used. By signing, you:
 
@@ -88,9 +91,9 @@ jobs:
 
             CLAs are standard practice across major open source projects including those under the Apache Software Foundation and the Linux Foundation. Ours is based on the Apache Software Foundation's CLA. Most importantly, it would enable us to relicense the project under a more permissive license in the future, giving the project and its community greater flexibility.
 
-            ✍ **To sign, please post a new comment on this PR with exactly the following text:** ✍
+            **To sign, please post a new comment on this PR with exactly the following text:**
 
           custom-pr-sign-comment: I have read and agree to the Contributor License Agreement
 
           custom-allsigned-prcomment: |
-            ✅ All contributors have signed the CLA. Thank you! This PR is ready to be merged.
+            All contributors have signed the CLA. Thank you! This PR is ready to be merged.
