@@ -58,11 +58,11 @@ Windows arm64 native wheels to PyPI and the matching GitHub Release. Install
 an exact release from PyPI with:
 
 ```shell
-pip install dinkster-aimdo==0.5.5.post1
+pip install dinkster-aimdo==0.5.5.post2
 ```
 
-The distribution name is `dinkster-aimdo`; the Python import remains
-`comfy_aimdo`. Each GitHub Release also includes a JSON manifest that records
+The distribution name is `dinkster-aimdo`; import it as `dinkster_aimdo`.
+Each GitHub Release also includes a JSON manifest that records
 the exact source commit and every native wheel's filename, platform tags, byte
 size, and SHA-256 hash. The pure-Python stub wheel is not part of this channel.
 

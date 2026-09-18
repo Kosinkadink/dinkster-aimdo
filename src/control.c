@@ -258,7 +258,7 @@ bool init(const int *cuda_device_ids, const uint64_t *extra_vram_headrooms, size
         devctx->_integrated_device = is_integrated_cuda_device(dev);
         if (devctx->_integrated_device) {
             devctx->_integrated_ram_headroom = calculate_integrated_ram_headroom(vram_capacity);
-            log(INFO, "comfy-aimdo integrated Linux GPU RAM headroom: %zu MB\n",
+            log(INFO, "dinkster-aimdo integrated Linux GPU RAM headroom: %zu MB\n",
                 integrated_ram_headroom / M);
         }
 #endif
@@ -266,9 +266,9 @@ bool init(const int *cuda_device_ids, const uint64_t *extra_vram_headrooms, size
 #if (defined(_WIN32) || defined(_WIN64)) && defined(AIMDO_CUDA)
         if (!integrated_device && nvml_pressure) {
             if (aimdo_nvml_device_init(dev, &devctx->_nvml_device)) {
-                log(INFO, "comfy-aimdo NVML pressure enabled\n");
+                log(INFO, "dinkster-aimdo NVML pressure enabled\n");
             } else {
-                log(WARNING, "comfy-aimdo NVML pressure unavailable; falling back to cuMemGetInfo\n");
+                log(WARNING, "dinkster-aimdo NVML pressure unavailable; falling back to cuMemGetInfo\n");
             }
         }
 #endif
@@ -280,7 +280,7 @@ bool init(const int *cuda_device_ids, const uint64_t *extra_vram_headrooms, size
             sprintf(dev_name, "<unknown>");
         }
 
-        log(INFO, "comfy-aimdo inited for GPU: %s (VRAM: %zu MB)\n",
+        log(INFO, "dinkster-aimdo inited for GPU: %s (VRAM: %zu MB)\n",
             dev_name, (size_t)(vram_capacity / (1024 * 1024)));
     }
 

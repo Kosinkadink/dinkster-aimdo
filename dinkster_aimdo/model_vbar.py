@@ -56,6 +56,9 @@ class ModelVBAR:
         self.max_size = size
         self.offset = 0
         self.base_addr = lib.vbar_get(self._devctx, self._ptr)
+        # ctypes weakly caches generated array types, so retain them for this VBAR.
+        self._signature_types = {}
+        self._residency_type = None
 
     def prioritize(self, malloc_async_clamp=None):
         if malloc_async_clamp is None:
@@ -84,7 +87,12 @@ class ModelVBAR:
     def fault(self, alloc, size):
         offset = alloc - self.base_addr
         # +2, one for misalignment and one for rounding
-        signature = (ctypes.c_uint32 * (size // (32 * 1024 ** 2) + 2))()
+        length = size // (32 * 1024 ** 2) + 2
+        signature_type = self._signature_types.get(length)
+        if signature_type is None:
+            signature_type = ctypes.c_uint32 * length
+            self._signature_types[length] = signature_type
+        signature = signature_type()
         res = lib.vbar_fault(self._devctx, self._ptr, offset, size, signature)
         if res == 0:
             return signature
@@ -121,7 +129,9 @@ class ModelVBAR:
         Bit 1 (& 2): pinned
         """
         nr_pages = self.get_nr_pages()
-        buf = (ctypes.c_uint8 * nr_pages)()
+        if self._residency_type is None or self._residency_type._length_ != nr_pages:
+            self._residency_type = ctypes.c_uint8 * nr_pages
+        buf = self._residency_type()
         lib.vbar_get_residency(self._devctx, self._ptr, buf, nr_pages)
         return list(buf)
 

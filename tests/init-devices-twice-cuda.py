@@ -1,6 +1,6 @@
 # A second init_devices() must be refused, not reinstall the CUDA hooks over
 # the live ones and crash the next allocation.
-import comfy_aimdo.control as aimdo
+import dinkster_aimdo.control as aimdo
 import torch
 
 

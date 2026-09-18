@@ -1,4 +1,4 @@
-import comfy_aimdo.control as aimdo
+import dinkster_aimdo.control as aimdo
 import torch
 
 

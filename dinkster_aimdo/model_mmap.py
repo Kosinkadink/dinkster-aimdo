@@ -24,7 +24,7 @@ if lib is not None:
 class ModelMMAP:
     def __init__(self, filepath):
         if lib is None:
-            raise RuntimeError("comfy-aimdo is not initialized")
+            raise RuntimeError("dinkster-aimdo is not initialized")
 
         normalized_path = os.fspath(filepath)
         if isinstance(normalized_path, bytes):
