@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import sys
 import tempfile
@@ -36,6 +37,9 @@ class ReleaseManifestTests(unittest.TestCase):
     def test_complete_native_matrix_is_hashed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             wheels = self.make_wheels(Path(directory))
+            expected_hashes = {
+                wheel.name: hashlib.sha256(wheel.read_bytes()).hexdigest() for wheel in wheels
+            }
             manifest = manifest_builder.build_manifest(
                 wheels,
                 repository="Kosinkadink/dinkster-aimdo",
@@ -49,7 +53,10 @@ class ReleaseManifestTests(unittest.TestCase):
         entries = manifest["wheels"]
         self.assertEqual(len(entries), 4)
         self.assertEqual({entry["size"] for entry in entries}, {7})
-        self.assertTrue(all(len(entry["sha256"]) == 64 for entry in entries))
+        self.assertEqual(
+            {entry["filename"]: entry["sha256"] for entry in entries},
+            expected_hashes,
+        )
         self.assertIn(
             ["manylinux_2_17_x86_64", "manylinux2014_x86_64"],
             [entry["platform_tags"] for entry in entries],
@@ -67,7 +74,7 @@ class ReleaseManifestTests(unittest.TestCase):
                     source_commit=COMMIT,
                 )
 
-    def test_wrong_version_and_stub_wheel_are_rejected(self) -> None:
+    def test_wrong_version_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             wheels = self.make_wheels(root)
@@ -75,6 +82,21 @@ class ReleaseManifestTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "version does not match"):
                 manifest_builder.build_manifest(
                     wheels,
+                    repository="Kosinkadink/dinkster-aimdo",
+                    release_tag=f"v{VERSION}",
+                    version=VERSION,
+                    source_commit=COMMIT,
+                )
+
+    def test_stub_wheel_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            wheels = self.make_wheels(root)
+            stub = root / f"dinkster_aimdo-{VERSION}-py3-none-any.whl"
+            stub.write_bytes(b"stub")
+            with self.assertRaisesRegex(ValueError, "stable ABI"):
+                manifest_builder.build_manifest(
+                    wheels + [stub],
                     repository="Kosinkadink/dinkster-aimdo",
                     release_tag=f"v{VERSION}",
                     version=VERSION,
