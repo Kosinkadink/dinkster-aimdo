@@ -3,20 +3,20 @@ import time
 import ctypes
 import math
 
-##VERY IMPORTANT: comfy_aimfo.control.init() must be called before torch is imported or anything that
-#imports torch (including comfy_aimdo.torch(
+##VERY IMPORTANT: dinkster_aimdo.control.init() must be called before torch is imported or anything that
+#imports torch (including dinkster_aimdo.torch(
 
-import comfy_aimdo.control
-comfy_aimdo.control.init()
-comfy_aimdo.control.set_log_info()
-#comfy_aimdo.control.set_log_debug() #use this to see much more information
-#comfy_aimdo.control.set_log_verbose() #use this to see even more information (there is also vverbose)
+import dinkster_aimdo.control
+dinkster_aimdo.control.init()
+dinkster_aimdo.control.set_log_info()
+#dinkster_aimdo.control.set_log_debug() #use this to see much more information
+#dinkster_aimdo.control.set_log_verbose() #use this to see even more information (there is also vverbose)
 
 import torch
-import comfy_aimdo.torch
-from comfy_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin, vbar_signature_compare
+import dinkster_aimdo.torch
+from dinkster_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin, vbar_signature_compare
 
-comfy_aimdo.control.init_device(torch.device(torch.cuda.current_device()).index)
+dinkster_aimdo.control.init_device(torch.device(torch.cuda.current_device()).index)
 
 signatures = {}
 
@@ -26,7 +26,7 @@ def run_layer(input_tensor, weight, cpu_source, weight_offset): #NOTE: offset ju
     vbar, ptr, size = weight
     signature = vbar_fault(weight)
     if signature is not None:
-        weight_tensor = comfy_aimdo.torch.aimdo_to_tensor(weight, torch.device("cuda:0")).view(dtype=input_tensor.dtype).view(input_tensor.shape)
+        weight_tensor = dinkster_aimdo.torch.aimdo_to_tensor(weight, torch.device("cuda:0")).view(dtype=input_tensor.dtype).view(input_tensor.shape)
         if not vbar_signature_compare(signature, signatures.get(weight, None)):
             weight_tensor.copy_(cpu_source)
             if weight_offset is not None:
@@ -85,7 +85,7 @@ print("Some weights will be loaded and stay there for all iterations")
 print("Some weights will be offloaded\n")
 
 run_model(weights1, cpu_weight1)
-comfy_aimdo.control.analyze() #print some stats
+dinkster_aimdo.control.analyze() #print some stats
 
 #A smaller second model but with chunkier weights
 num_layers=3
@@ -99,7 +99,7 @@ print("##################### Run the second model #######################")
 print("Everything will be loaded and will displace some weights of the first model\n")
 
 run_model(weights2, cpu_weight2, sleep=0.5)
-comfy_aimdo.control.analyze() #print some stats
+dinkster_aimdo.control.analyze() #print some stats
 
 print("##################### Run the first model again #######################")
 print("Some weights will still be loaded from before and be there first iteration")
@@ -108,4 +108,4 @@ print("The rest will be offloaded again\n")
 
 vbar1.prioritize()
 run_model(weights1, cpu_weight1)
-comfy_aimdo.control.analyze() #print some stats
+dinkster_aimdo.control.analyze() #print some stats

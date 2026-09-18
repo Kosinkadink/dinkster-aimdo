@@ -4,7 +4,7 @@ import os
 os.environ['PYTORCH_ALLOC_CONF'] = 'backend:cudaMallocAsync'
 import json
 import torch
-import comfy_aimdo.control as aimdo
+import dinkster_aimdo.control as aimdo
 
 M = 1024 * 1024
 assert aimdo.init('cuda')

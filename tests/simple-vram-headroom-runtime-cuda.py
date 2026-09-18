@@ -5,7 +5,7 @@ import os
 
 os.environ.setdefault("PYTORCH_ALLOC_CONF", "backend:cudaMallocAsync")
 
-import comfy_aimdo.control as aimdo
+import dinkster_aimdo.control as aimdo
 import torch
 
 
@@ -15,8 +15,8 @@ CHUNK = 128 * M
 DEFAULT_HEADROOM = 256 * M
 
 assert aimdo.init("cuda")
-import comfy_aimdo.torch  # noqa: E402
-from comfy_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin  # noqa: E402
+import dinkster_aimdo.torch  # noqa: E402
+from dinkster_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin  # noqa: E402
 
 device = torch.cuda.current_device()
 assert aimdo.init_device(device)
@@ -39,7 +39,7 @@ def forward(fill=None):
         if vbar_fault(alloc) is None:
             continue
         if fill is not None:
-            comfy_aimdo.torch.aimdo_to_tensor(alloc, cuda_device).fill_(fill)
+            dinkster_aimdo.torch.aimdo_to_tensor(alloc, cuda_device).fill_(fill)
         vbar_unpin(alloc)
         faulted += 1
     torch.cuda.synchronize()

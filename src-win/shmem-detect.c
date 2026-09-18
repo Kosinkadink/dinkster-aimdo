@@ -72,7 +72,7 @@ bool aimdo_wddm_init(CUdevice dev)
             }
 
             log(INFO,
-                "comfy-aimdo WDDM adapter match: %s runtime_luid=%08lx:%08lx dxgi_luid=%08lx:%08lx\n",
+                "dinkster-aimdo WDDM adapter match: %s runtime_luid=%08lx:%08lx dxgi_luid=%08lx:%08lx\n",
                 adapter_name,
                 (unsigned long)(unsigned int)cuda_luid.HighPart,
                 (unsigned long)cuda_luid.LowPart,
@@ -91,7 +91,7 @@ fail:
     if (factory) {
         factory->lpVtbl->Release(factory);
     }
-    log(WARNING, "comfy-aimdo WDDM init failed (%d). aimdo is blind to the driver sysmem fallback policy\n", fail_code);
+    log(WARNING, "dinkster-aimdo WDDM init failed (%d). aimdo is blind to the driver sysmem fallback policy\n", fail_code);
     return false;
 }
 
@@ -130,7 +130,7 @@ bool poll_budget_deficit(const char **prevailing_deficit_method)
                 (size_t)(info.CurrentReservation / M),
                 (size_t)(info.AvailableForReservation / M));
         } else {
-            log(WARNING, "comfy-aimdo WDDM VRAM query failed. Using physical capacity as fallback\n");
+            log(WARNING, "dinkster-aimdo WDDM VRAM query failed. Using physical capacity as fallback\n");
         }
     }
 

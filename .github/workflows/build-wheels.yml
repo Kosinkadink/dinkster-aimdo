@@ -84,15 +84,15 @@ jobs:
           nmake
           popd
 
-          del /q comfy_aimdo\*.dll 2>nul
+          del /q dinkster_aimdo\*.dll 2>nul
           cl.exe /LD /O2 /DAIMDO_CUDA ^
             src/*.c src-cuda/dispatch.c src-win/*.c ^
-            /Isrc /Isrc-win /IC:/Detours/include /FIcompiler.h /Fe:comfy_aimdo/aimdo.dll ^
+            /Isrc /Isrc-win /IC:/Detours/include /FIcompiler.h /Fe:dinkster_aimdo/aimdo.dll ^
             /link /LIBPATH:%DETOURS_LIB_DIR% ^
             cfgmgr32.lib dxgi.lib dxguid.lib setupapi.lib detours.lib onecore.lib
           cl.exe /LD /O2 /D__HIP_PLATFORM_AMD__ ^
             src/*.c src-hip/dispatch.c src-win/*.c ^
-            /Isrc /Isrc-win /IC:/Detours/include /FIcompiler.h /Fe:comfy_aimdo/aimdo_rocm.dll ^
+            /Isrc /Isrc-win /IC:/Detours/include /FIcompiler.h /Fe:dinkster_aimdo/aimdo_rocm.dll ^
             /link /LIBPATH:%DETOURS_LIB_DIR% ^
             cfgmgr32.lib dxgi.lib dxguid.lib setupapi.lib detours.lib onecore.lib
         shell: cmd
@@ -101,7 +101,7 @@ jobs:
         if: matrix.platform == 'linux' && matrix.arch == 'x86_64'
         run: |
           pip install build
-          rm -f comfy_aimdo/*.so comfy_aimdo/*.dll
+          rm -f dinkster_aimdo/*.so dinkster_aimdo/*.dll
           python -m build --wheel --outdir wheelhouse-none/
 
       - name: Upload Stub Wheel

@@ -14,11 +14,11 @@ authors = [{name = "rattus"}]
 Repository = "https://github.com/Kosinkadink/dinkster-aimdo"
 
 [tool.setuptools]
-packages = ["comfy_aimdo"]
+packages = ["dinkster_aimdo"]
 
 [tool.setuptools.package-data]
-"comfy_aimdo" = ["*.so", "*.dll"]
+"dinkster_aimdo" = ["*.so", "*.dll"]
 
 [tool.setuptools_scm]
-version_file = "comfy_aimdo/_version.py"
+version_file = "dinkster_aimdo/_version.py"
 local_scheme = "no-local-version"

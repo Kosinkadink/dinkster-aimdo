@@ -15,7 +15,7 @@ manifest_builder = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = manifest_builder
 SPEC.loader.exec_module(manifest_builder)
 
-VERSION = "0.5.5.post1"
+VERSION = "0.5.5.post2"
 COMMIT = "1" * 40
 PLATFORMS = (
     "manylinux2014_aarch64.manylinux_2_17_aarch64",

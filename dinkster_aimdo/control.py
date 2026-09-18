@@ -90,13 +90,13 @@ def init(implementation: str | None = None, simple_vram_headroom: int | None = N
             ext = "so"
             mode = 258
         else:
-            logging.info(f"comfy-aimdo unsupported operating system: {system}")
-            logging.info(f"NOTE: comfy-aimdo currently only supports Windows and Linux")
+            logging.info(f"dinkster-aimdo unsupported operating system: {system}")
+            logging.info(f"NOTE: dinkster-aimdo currently only supports Windows and Linux")
             return False
         lib = ctypes.CDLL(str(base_path / f"{impl}.{ext}"), mode=mode)
     except Exception as e:
-        logging.info(f"comfy-aimdo failed to load: {e}")
-        logging.info(f"NOTE: comfy-aimdo currently only supports Nvidia and AMD GPUs")
+        logging.info(f"dinkster-aimdo failed to load: {e}")
+        logging.info(f"NOTE: dinkster-aimdo currently only supports Nvidia and AMD GPUs")
         return False
 
     lib.set_log_callback.argtypes = [_LOG_CALLBACK]
@@ -161,7 +161,7 @@ def init_devices(device_ids):
         return False
 
     if devctxs:
-        logging.warning("comfy-aimdo devices are already initialized, call deinit() first")
+        logging.warning("dinkster-aimdo devices are already initialized, call deinit() first")
         return False
 
     requested = []
@@ -210,7 +210,7 @@ def get_devctx(device_id: int):
     devctx = lib.get_devctx(int(device_id))
     if devctx:
         return devctx
-    raise RuntimeError(f"comfy-aimdo device {device_id} is not initialized")
+    raise RuntimeError(f"dinkster-aimdo device {device_id} is not initialized")
 
 def set_simple_vram_headroom(headroom: int):
     """Set the VRAM the simple budget keeps free, in bytes.
@@ -231,12 +231,12 @@ def set_simple_vram_headroom(headroom: int):
     if headroom < 0 or headroom > (1 << 60):
         raise ValueError("simple_vram_headroom must be between 0 and 2**60 bytes")
     if lib is None:
-        raise RuntimeError("comfy-aimdo is not initialized")
+        raise RuntimeError("dinkster-aimdo is not initialized")
     lib.set_simple_vram_headroom(headroom)
 
 def get_simple_vram_headroom():
     if lib is None:
-        raise RuntimeError("comfy-aimdo is not initialized")
+        raise RuntimeError("dinkster-aimdo is not initialized")
     return int(lib.get_simple_vram_headroom())
 
 def deinit():

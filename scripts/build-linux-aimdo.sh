@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BUILD_DIR="$ROOT_DIR/build"
-CUDA_OUTPUT_PATH="$ROOT_DIR/comfy_aimdo/aimdo.so"
-ROCM_OUTPUT_PATH="$ROOT_DIR/comfy_aimdo/aimdo_rocm.so"
+CUDA_OUTPUT_PATH="$ROOT_DIR/dinkster_aimdo/aimdo.so"
+ROCM_OUTPUT_PATH="$ROOT_DIR/dinkster_aimdo/aimdo_rocm.so"
 FUNCHOOK_VERSION=1.1.3
 FUNCHOOK_SRC="$BUILD_DIR/funchook-$FUNCHOOK_VERSION"
 FUNCHOOK_TARBALL="$BUILD_DIR/funchook-$FUNCHOOK_VERSION.tar.gz"
