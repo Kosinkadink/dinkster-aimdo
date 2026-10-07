@@ -69,3 +69,9 @@ size, and SHA-256 hash. The pure-Python stub wheel is not part of this channel.
 ## Caveats:
 
 * There is no real way for this allocator to tell the difference between high usage and bad fragmentation in the pytorch caching allocator. As we always return success to the pytorch caching allocator it experiences no pressure while weights are being offloaded which means it can run in an extremely fragmented mode. The assumption is model weight access patterns are reasonably regular over blocks or iterations and it finds a good set of sizes to cache. What you should generally do though, is completely flush the pytorch caching allocator before each new model run, which avoids completely un-used reservations from taking priority over the next models weights.
+
+## License and security
+
+This project is licensed under [GPL-3.0](LICENSE). The original author/copyright
+holder reserves the right to offer the software under alternative licenses in
+the future. See [SECURITY.md](SECURITY.md) for private vulnerability reporting.
